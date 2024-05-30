@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const ALPHA_VANTAGE_API_KEY = 'PI3CT37V5KD1D5E2';
+    const ALPHA_VANTAGE_API_KEY = 'RC8L94IHH9CWILQA';
     const ALPHA_VANTAGE_URL = 'https://www.alphavantage.co/query';
 
     // Function to fetch real-time price
@@ -32,37 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 purchaseDate,
                 sector
             };
-        },
-
-        // Method to remove a stock from the portfolio
-        removeStock: function(symbol) {
-            if (symbol in this.stocks) {
-                delete this.stocks[symbol];
-                console.log(`Stock ${symbol} removed successfully.`);
-            } else {
-                console.log(`Stock ${symbol} not found in portfolio.`);
-            }
-        },
-
-        // Method to edit a stock in the portfolio
-        editStock: function(symbol, quantity, purchasePrice, purchaseDate, sector) {
-            if (symbol in this.stocks) {
-                if (quantity !== undefined) {
-                    this.stocks[symbol].quantity = quantity;
-                }
-                if (purchasePrice !== undefined) {
-                    this.stocks[symbol].purchasePrice = purchasePrice;
-                }
-                if (purchaseDate !== undefined) {
-                    this.stocks[symbol].purchaseDate = purchaseDate;
-                }
-                if (sector !== undefined) {
-                    this.stocks[symbol].sector = sector;
-                }
-                console.log(`Stock ${symbol} edited successfully.`);
-            } else {
-                console.log(`Stock ${symbol} not found in portfolio.`);
-            }
         },
 
         // Method to display the portfolio
@@ -109,59 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const outputDiv = document.getElementById('output');
             outputDiv.innerHTML = '';
             outputDiv.appendChild(table);
-        },
-
-        // Method to project future value of the portfolio
-        futureProjection: async function(expectedRateOfReturn) {
-            const projectionTable = document.createElement('table');
-            projectionTable.innerHTML = `
-                <tr>
-                    <th>Symbol</th>
-                    <th>Current Value</th>
-                    <th>Projected Value</th>
-                </tr>
-            `;
-            for (const symbol in this.stocks) {
-                const details = this.stocks[symbol];
-                const currentPrice = await getRealTimePrice(symbol);
-                if (currentPrice !== null) {
-                    const quantity = details.quantity;
-                    const currentValue = quantity * currentPrice;
-                    const projectedValue = currentValue * (1 + expectedRateOfReturn);
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${symbol}</td>
-                        <td>${currentValue}</td>
-                        <td>${projectedValue}</td>
-                    `;
-                    projectionTable.appendChild(row);
-                }
-            }
-            const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '';
-            outputDiv.appendChild(projectionTable);
-        },
-
-        // Method to save the portfolio to localStorage
-        savePortfolio: function() {
-            const jsonPortfolio = JSON.stringify(this.stocks);
-            localStorage.setItem('portfolio', jsonPortfolio);
-            console.log("Portfolio saved successfully.");
-        },
-
-        // Method to load the portfolio from localStorage
-        loadPortfolio: function() {
-            const jsonPortfolio = localStorage.getItem('portfolio');
-            if (jsonPortfolio !== null) {
-                this.stocks = JSON.parse(jsonPortfolio);
-                console.log("Portfolio loaded successfully.");
-            } else {
-                console.log("No portfolio found.");
-            }
         }
     };
 
-    // Add event listeners to buttons
+    // Add button functionality
     document.getElementById('addStockBtn').addEventListener('click', async () => {
         const symbol = prompt("Enter the stock symbol:");
         const quantity = parseInt(prompt("Enter the quantity:"));
@@ -172,19 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (symbol && !isNaN(quantity) && !isNaN(purchasePrice) && purchaseDate && sector) {
             portfolio.addStock(symbol, quantity, purchasePrice, purchaseDate, sector);
             console.log(`Stock ${symbol} added successfully.`);
+            portfolio.displayPortfolio(); // Update the displayed portfolio after adding the new stock
         } else {
             console.error("Invalid input. Please provide valid data for all fields.");
         }
     });
 
-    document.getElementById('removeStockBtn').addEventListener('click', () => {
-        const symbol = prompt("Enter the stock symbol to remove:");
-        if (symbol) {
-            portfolio.removeStock(symbol);
-        }
-    });
-
-    document.getElementById('editStockBtn').addEventListener('click', async () => {
-        const symbol = prompt("Enter the stock symbol to edit:");
-        if (symbol in portfolio.stocks) {
-           
+    // Display initial portfolio
+    portfolio.displayPortfolio();
+});
